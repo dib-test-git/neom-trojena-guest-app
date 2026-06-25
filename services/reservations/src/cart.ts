@@ -22,6 +22,9 @@ export const CartLine = z.object({
   /** Amount in halalas (SAR * 100) to avoid float drift. */
   amountHalalas: z.number().int().nonnegative(),
   quantity: z.number().int().positive().default(1),
+  /** Optional time window for inventory-bearing line types (slopes/spa). */
+  windowStart: z.string().datetime().optional(),
+  windowEnd: z.string().datetime().optional(),
 });
 export type CartLine = z.infer<typeof CartLine>;
 
@@ -41,26 +44,60 @@ export interface CartTotals {
   subtotalHalalas: number;
   vatHalalas: number;
   totalHalalas: number;
+  kindBreakdown: Record<CartLineKind, number>;
 }
+
+const ZERO_BREAKDOWN: Record<CartLineKind, number> = {
+  slopes: 0,
+  dining: 0,
+  spa: 0,
+};
 
 /**
  * Pure totals calculator. Kept side-effect-free so it can be reused both
  * server-side (for the ZATCA invoice) and client-side (for the checkout UI).
+ *
+ * Now also returns a per-kind breakdown so the mobile UI can render a small
+ * "slopes + dining + spa" badge above the cart.
  */
 export function totalCart(cart: Cart): CartTotals {
-  const subtotalHalalas = cart.lines.reduce(
-    (sum, line) => sum + line.amountHalalas * line.quantity,
-    0,
-  );
+  const kindBreakdown: Record<CartLineKind, number> = { ...ZERO_BREAKDOWN };
+  let subtotalHalalas = 0;
+  for (const line of cart.lines) {
+    const lineTotal = line.amountHalalas * line.quantity;
+    subtotalHalalas += lineTotal;
+    kindBreakdown[line.kind] += lineTotal;
+  }
   const vatHalalas = Math.round(subtotalHalalas * VAT_RATE);
   return {
     subtotalHalalas,
     vatHalalas,
     totalHalalas: subtotalHalalas + vatHalalas,
+    kindBreakdown,
   };
 }
 
+export function kindsPresent(cart: Cart): CartLineKind[] {
+  const seen = new Set<CartLineKind>();
+  for (const l of cart.lines) seen.add(l.kind);
+  return Array.from(seen);
+}
+
 export function addLine(cart: Cart, line: CartLine): Cart {
+  // Enforce: a cart cannot hold two slopes lines covering overlapping windows.
+  if (line.kind === 'slopes' && line.windowStart && line.windowEnd) {
+    const overlap = cart.lines.find(
+      (l) =>
+        l.kind === 'slopes' &&
+        l.windowStart &&
+        l.windowEnd &&
+        l.windowStart < line.windowEnd! &&
+        line.windowStart! < l.windowEnd,
+    );
+    if (overlap) {
+      throw new Error(`slopes line overlaps with ${overlap.id}`);
+    }
+  }
   return {
     ...cart,
     lines: [...cart.lines, line],
