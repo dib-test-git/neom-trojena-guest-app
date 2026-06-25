@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../hooks/useCart';
 import { CartLine } from '../components/CartLine';
 import { PaymentSheet } from '../components/PaymentSheet';
+import { CartKindBadges } from '../components/CartKindBadges';
 
 /**
  * Unified checkout screen.
@@ -16,7 +17,7 @@ import { PaymentSheet } from '../components/PaymentSheet';
  */
 export function CheckoutScreen(): JSX.Element {
   const { t } = useTranslation();
-  const { cart, total, vat } = useCart();
+  const { cart, total, vat, kindsPresent } = useCart();
   const [submitting, setSubmitting] = useState(false);
 
   const summary = useMemo(
@@ -41,6 +42,7 @@ export function CheckoutScreen(): JSX.Element {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{t('checkout.title')}</Text>
+      <CartKindBadges kinds={kindsPresent} />
 
       {cart.lines.map((line) => (
         <CartLine key={line.id} line={line} />
@@ -57,7 +59,7 @@ export function CheckoutScreen(): JSX.Element {
       <Button
         title={t('checkout.cta')}
         onPress={() => onPay('apple_pay')}
-        disabled={submitting}
+        disabled={submitting || cart.lines.length === 0}
       />
     </ScrollView>
   );
