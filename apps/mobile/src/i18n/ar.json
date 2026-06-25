@@ -2,6 +2,7 @@
   "lift_queue.title": "طوابير المصاعد",
   "lift_queue.label": "أوقات الانتظار المباشرة",
   "lift_queue.last_updated": "آخر تحديث {{time}}",
+  "lift_queue.stale_warning": "قد تكون الإشارة قديمة",
   "lift_queue.empty": "لا توجد مصاعد نشطة حالياً.",
   "lift_queue.wait_minutes_one": "دقيقة واحدة",
   "lift_queue.wait_minutes_other": "{{count}} دقيقة",
