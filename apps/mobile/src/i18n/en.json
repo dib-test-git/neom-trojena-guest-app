@@ -2,6 +2,7 @@
   "lift_queue.title": "Lift Queues",
   "lift_queue.label": "Live wait times",
   "lift_queue.last_updated": "Last updated {{time}}",
+  "lift_queue.stale_warning": "Signal may be stale",
   "lift_queue.empty": "No active lifts right now.",
   "lift_queue.wait_minutes_one": "{{count}} min",
   "lift_queue.wait_minutes_other": "{{count}} mins",
