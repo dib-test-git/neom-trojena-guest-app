@@ -1,0 +1,22 @@
+{
+  "name": "neom-trojena-guest-app",
+  "private": true,
+  "version": "0.4.0",
+  "description": "NEOM Trojena Mountain Resort guest app + reservations + lift-queue services.",
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -b --pretty",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "eslint": "^9.2.0"
+  }
+}

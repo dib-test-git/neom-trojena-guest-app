@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.npm
+.eslintcache
+coverage/
+dist/
+build/
+.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# iOS
+apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/ios/.xcode.env.local
+apps/mobile/ios/DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Android
+apps/mobile/android/.gradle/
+apps/mobile/android/build/
+apps/mobile/android/app/build/
+apps/mobile/android/local.properties
+apps/mobile/android/.idea/
+apps/mobile/android/*.iml
+apps/mobile/android/keystores/debug.keystore
+
+# React Native
+apps/mobile/.expo/
+apps/mobile/.metro-health-check*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

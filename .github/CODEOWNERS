@@ -1,0 +1,16 @@
+# Trojena guest app — code owners
+# Reviews enforced via branch protection on `main`.
+
+*                           @neom-trojena-leads
+
+# Mobile surface
+/apps/mobile/               @neom-mobile @neom-trojena-leads
+/apps/mobile/src/i18n/      @neom-mobile @neom-localization
+
+# Backend services
+/services/reservations/     @neom-trojena-leads @neom-payments
+/services/lift-queue/       @neom-trojena-leads
+
+# Docs and CI
+/docs/                      @neom-trojena-leads
+/.github/                   @neom-trojena-leads
