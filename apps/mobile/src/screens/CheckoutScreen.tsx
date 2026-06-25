@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Button, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Button,
+  I18nManager,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useCart } from '../hooks/useCart';
@@ -15,9 +23,20 @@ import { PaymentSheet } from '../components/PaymentSheet';
  * Tracked in KAN-30; bilingual edge-cases tracked in KAN-31 / KAN-51.
  */
 export function CheckoutScreen(): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { cart, total, vat } = useCart();
   const [submitting, setSubmitting] = useState(false);
+
+  // KAN-51: under Arabic locale, React Native re-mounts this screen with
+  // `i18n.language` set before `I18nManager.isRTL` has flipped. The native
+  // text-align style we used to compute eagerly threw an undefined-style
+  // error from the bridge. We now derive the alignment lazily and only after
+  // i18n has reported a language tag we recognise.
+  const isRTL = useMemo(() => {
+    const lang = i18n?.language ?? 'en';
+    if (!lang) return false;
+    return lang.startsWith('ar') || I18nManager.isRTL;
+  }, [i18n?.language]);
 
   const summary = useMemo(
     () => ({
@@ -40,16 +59,21 @@ export function CheckoutScreen(): JSX.Element {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{t('checkout.title')}</Text>
+      <Text
+        style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}
+        accessibilityRole="header"
+      >
+        {t('checkout.title')}
+      </Text>
 
       {cart.lines.map((line) => (
         <CartLine key={line.id} line={line} />
       ))}
 
       <View style={styles.summary}>
-        <Row label={t('checkout.subtotal')} value={summary.subtotal} />
-        <Row label={t('checkout.vat')} value={summary.vat} />
-        <Row label={t('checkout.total')} value={summary.total} bold />
+        <Row label={t('checkout.subtotal')} value={summary.subtotal} isRTL={isRTL} />
+        <Row label={t('checkout.vat')} value={summary.vat} isRTL={isRTL} />
+        <Row label={t('checkout.total')} value={summary.total} isRTL={isRTL} bold />
       </View>
 
       <PaymentSheet onPay={onPay} disabled={submitting} />
@@ -66,14 +90,21 @@ export function CheckoutScreen(): JSX.Element {
 function Row({
   label,
   value,
+  isRTL,
   bold,
 }: {
   label: string;
   value: number;
+  isRTL: boolean;
   bold?: boolean;
 }): JSX.Element {
   return (
-    <View style={styles.row}>
+    <View
+      style={[
+        styles.row,
+        { flexDirection: isRTL ? 'row-reverse' : 'row' },
+      ]}
+    >
       <Text style={[styles.rowLabel, bold && styles.bold]}>{label}</Text>
       <Text style={[styles.rowValue, bold && styles.bold]}>
         {value.toFixed(2)} SAR
@@ -94,7 +125,6 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   row: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 4,
   },
